@@ -1,5 +1,6 @@
-// CTRL + / to focus chat box
-// ==========================
+// Focus Shortcut
+// ============================================================================
+
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
     // Check if CTRL is pressed and the key is '/'
@@ -15,8 +16,9 @@ $(document).ready(() => {
 })
 
 
-// Working <spoiler> tags in responses
-// ===================================
+// Spoiler Tags
+// ============================================================================
+
 function applySpoilerTagsToContent(parentElement) {
   // If the parent element is a code block, skip it
   if (parentElement.tagName === 'PRE') {
@@ -88,8 +90,9 @@ $(document).ready(() => {
 })
 
 
-// Resizable chat box
-// ==================
+// Resizable Chat Box
+// ============================================================================
+
 // This resets the user applied size after message submit,
 // so that the chat box will be able to auto-resize as normal
 // until the next time the user manually resizes.
@@ -103,8 +106,8 @@ $(document).ready(() => {
 });
 
 
-// Only submit on CTRL + Enter
-// ===========================
+// Don't Submit on Enter
+// ============================================================================
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
     if ($(event.target).is('textarea#prompt-textarea')) {

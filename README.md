@@ -8,10 +8,10 @@ This is a collection of JavaScript and CSS that I have created (yes, with signif
 
 So far, the following features are available:
 
-- Shortcut `CTRL + \` to focus the chat box
-- Working `<spoiler>` tags in responses
-- Resizable chat box
-- Only submit on CTRL + Enter
+- **Focus Shortcut**: Press `/` to focus on the chat box
+- **Spoiler Tags**: Working `<spoiler>` tags in responses
+- **Resizable Chat Box**: Drag to make it taller or shorter
+- **Don't Submit on Enter**: Only submit on `^ CTRL + Enter` or `⌘ CMD + Enter`
 
 Future improvements might include:
 
@@ -31,25 +31,25 @@ I use the [User JavaScript and CSS](https://chrome.google.com/webstore/detail/us
 
 ## In depth feature documentation
 
-### Focus shortcut ( `/` )
+### Focus Shortcut
 
 This one is pretty simple. It listens to the whole page for the relevant keypress, and when detected, it shifts focus to the chat box. I picked `/` because that's what Youtube uses.
 
 Future improvement: Add a setting to change `/` to other keys if desired.
 
-### Working `<spoiler>` tags in responses
+### Spoiler Tags
 
 This scans message content for `<spoiler>...</spoiler>` in the text response and replaces it with actual functioning spoiler tags.
 
 Example use case: "Give me a riddle and output your answer in a spoiler tag."
 
-Sample custom instructions (untested): "You can output text that is hidden except on hover by using <spoiler> </spoiler> tags."
+Sample custom instructions (untested): `You can output text that is hidden except on hover by using <spoiler> </spoiler> tags.`
 
 Future improvement: Adjustable styles in settings.
 
 Future improvement: Support other spoiler markup types, like `>!`.
 
-### Resizable chat box
+### Resizable Chat Box
 
 This allows you to resize the chat box by dragging from the upper right corner. I find this useful when typing out very long messages:
 - I can make a nice big textarea for myself to draft in
@@ -63,7 +63,7 @@ Future improvement: Setting to enable/disable the size reset.
 
 Future improvement: Prettier drag handle.
 
-### Only submit on `^ CTRL + Enter / ⌘ CMD + Enter`
+### Don't Submit on Enter
 
 You can now type away without fear of accidentally submitting your message early! Much like the similar functionality in Slack (and elsewhere), this reverses submission behavior so that normal Enter presses will just type a newline. `⇧ SHIFT + Enter` will do the same thing, as it did before. To actually submit, use `^ CTRL + Enter` or `⌘ CMD + Enter`.
 
