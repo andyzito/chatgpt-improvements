@@ -1,16 +1,18 @@
 // CTRL + \ to focus chat box
 // ==========================
-document.addEventListener('keydown', function(event) {
-  // Check if CTRL is pressed and the key is '/'
-  if (event.ctrlKey && event.key === '\\') {
-    // Set focus to the textarea
-    const textarea = document.querySelector('textarea#prompt-textarea');
-    if (textarea) {
-      textarea.focus();
-      event.preventDefault(); // Prevent any default behavior
+$(document).ready(() => {
+  document.addEventListener('keydown', (event) => {
+    // Check if CTRL is pressed and the key is '\'
+    if (event.ctrlKey && event.key === '\\') {
+      // Set focus to the textarea
+      const textarea = document.querySelector('textarea#prompt-textarea')
+      if (textarea) {
+        textarea.focus();
+        event.preventDefault(); // Prevent any default behavior
+      }
     }
-  }
-});
+  })
+})
 
 
 // Working <spoiler> tags in responses
@@ -80,7 +82,10 @@ function applySpoilerTagsToConversation() {
   });
 }
 
-setInterval(applySpoilerTagsToConversation, 1000);
+$(document).ready(() => {
+  applySpoilerTagsToConversation()
+  setInterval(applySpoilerTagsToConversation, 1000);
+})
 
 
 // Resizable chat box
@@ -88,7 +93,7 @@ setInterval(applySpoilerTagsToConversation, 1000);
 // This resets the user applied size after message submit,
 // so that the chat box will be able to auto-resize as normal
 // until the next time the user manually resizes.
-$(document).ready(function() {
+$(document).ready(() => {
   $(document).on('keydown', 'textarea#prompt-textarea', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
 		  const outerDiv = $('main form > div > div.flex.w-full.items-center > div.flex')
@@ -100,8 +105,8 @@ $(document).ready(function() {
 
 // Only submit on CTRL + Enter
 // ===========================
-$(document).ready(function() {
-  document.addEventListener('keydown', function(event) {
+$(document).ready(() => {
+  document.addEventListener('keydown', (event) => {
     if ($(event.target).is('textarea#prompt-textarea')) {
       if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
         // Prevent submission

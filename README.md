@@ -8,12 +8,14 @@ This is a collection of JavaScript and CSS that I have created (yes, with signif
 
 So far, the following features are available:
 
-- Working `<spoiler>` tags in responses
 - Shortcut `CTRL + \` to focus the chat box
+- Working `<spoiler>` tags in responses
 - Resizable chat box
+- Only submit on CTRL + Enter
 
 Future improvements might include:
 
+- Settings!
 - Other working markup, for example a way to output colors
 - Font family and size customization
 - Collapsible code and other blocks
