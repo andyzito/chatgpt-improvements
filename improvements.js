@@ -16,6 +16,11 @@ document.addEventListener('keydown', function(event) {
 // Working <spoiler> tags in responses
 // ===================================
 function applySpoilerTagsToContent(parentElement) {
+  // If the parent element is a code block, skip it
+  if (parentElement.tagName === 'PRE') {
+    return;
+  }
+
   let isInsideSpoiler = false;
   let spoilerContent = '';
   let startNode = null;
@@ -25,7 +30,7 @@ function applySpoilerTagsToContent(parentElement) {
     const span = document.createElement('span');
     span.className = 'spoiler-content';
     span.textContent = spoilerContent;
-    
+
     // Replace startNode with spoiler span
     parentElement.replaceChild(span, startNode);
 
@@ -34,7 +39,7 @@ function applySpoilerTagsToContent(parentElement) {
       if (node && node.parentNode) {
         node.parentNode.removeChild(node);
 		  }
-		}); 
+		});
 
     // Reset states
 		toBeDeleted = [];
@@ -76,3 +81,18 @@ function applySpoilerTagsToConversation() {
 }
 
 setInterval(applySpoilerTagsToConversation, 1000);
+
+// Resizable chat box
+// ==================
+// This resets the user applied size after message submit,
+// so that the chat box will be able to auto-resize as normal
+// until the next time the user manually resizes.
+$(document).ready(function() {
+  $(document).on('keydown', 'textarea#prompt-textarea', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+		  const outerDiv = $('main form > div > div.flex.w-full.items-center > div.flex')
+      outerDiv.css('height', '');  // Clear the inline height style
+    }
+  });
+});
+
