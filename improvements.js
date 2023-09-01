@@ -108,6 +108,7 @@ $(document).ready(() => {
 
 // Don't Submit on Enter
 // ============================================================================
+
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
     if ($(event.target).is('textarea#prompt-textarea')) {

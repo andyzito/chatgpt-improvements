@@ -1,5 +1,6 @@
 /* Spoiler Tags */
 /* ===================================================== */
+
 .spoiler-content {
     background-color: black;
     color: black;
@@ -14,6 +15,7 @@
 
 /* Resizable Chat Box */
 /* ===================================================== */
+
 main form > div > div.flex.w-full.items-center > div.flex {
     transform: rotateX(180deg);
     resize: vertical !important;

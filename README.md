@@ -23,7 +23,7 @@ Future improvements might include:
 
 ## Why not just use a full improved interface like [chatwithgpt](https://github.com/cogentapps/chat-with-gpt)?
 
-I think that chatwithgpt and other efforts to provide a full fledged independent interface are super cool. However, they can be annoying to host and you must provide an API key. Personally, I find it satisfying to apply improvements on top of the existing interface, but that certainly comes with some disadvantages, and everyone should choose what is best for them.
+I think that chatwithgpt and other efforts to provide a full fledged independent interface are super cool and often provide excellent functionality. Moreover, applying custom functionality to the existing interface is frought -- any time OpenAI makes an interface change, it could break my code. So why am I doing this? Because I find it personally satisfying. Also, to be fair, it's easier to set this up than to host a custom interface yourself, and you don't have to provide an API key.
 
 ## How do I use this?
 
