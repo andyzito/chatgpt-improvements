@@ -1,0 +1,13 @@
+/* Working <spoiler> tags in responses */
+/* =================================== */
+.spoiler-content {
+    background-color: black;
+    color: black;
+    cursor: pointer;
+    padding: 0px 4px 4px 4px;
+    border-radius: 5px;
+}
+
+.spoiler-content:hover {
+    color: white;
+}
