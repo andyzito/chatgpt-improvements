@@ -36,3 +36,35 @@ I use the [User JavaScript and CSS](https://chrome.google.com/webstore/detail/us
 This one is pretty simple. It listens to the whole page for the relevant keypress, and when detected, it shifts focus to the chat box. I picked `/` because that's what Youtube uses.
 
 Future improvement: Add a setting to change `/` to other keys if desired.
+
+### Working `<spoiler>` tags in responses
+
+This scans message content for `<spoiler>...</spoiler>` in the text response and replaces it with actual functioning spoiler tags.
+
+Example use case: "Give me a riddle and output your answer in a spoiler tag."
+
+Sample custom instructions (untested): "You can output text that is hidden except on hover by using <spoiler> </spoiler> tags."
+
+Future improvement: Adjustable styles in settings.
+
+Future improvement: Support other spoiler markup types, like `>!`.
+
+### Resizable chat box
+
+This allows you to resize the chat box by dragging from the upper right corner. I find this useful when typing out very long messages:
+- I can make a nice big textarea for myself to draft in
+- I can shrink the chat box back down so I can see the whole conversation (by default, the chat box at max height covers the last few lines of the convo)
+
+When you press Enter to submit a message, the manual resizing is reset so that it will go back to auto-resizing until the next time you resize manually.
+
+Future improvement: Watch for other submission types (e.g. clicking the submit button) to restore auto-resize.
+
+Future improvement: Setting to enable/disable the size reset.
+
+Future improvement: Prettier drag handle.
+
+### Only submit on `^ CTRL + Enter / ⌘ CMD + Enter`
+
+You can now type away without fear of accidentally submitting your message early! Much like the similar functionality in Slack (and elsewhere), this reverses submission behavior so that normal Enter presses will just type a newline. `⇧ SHIFT + Enter` will do the same thing, as it did before. To actually submit, use `^ CTRL + Enter` or `⌘ CMD + Enter`.
+
+Future improvement: Alternate mode to do confirm dialog before submit?

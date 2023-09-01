@@ -1,4 +1,4 @@
-// CTRL + \ to focus chat box
+// CTRL + / to focus chat box
 // ==========================
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
