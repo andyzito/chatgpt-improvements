@@ -82,6 +82,7 @@ function applySpoilerTagsToConversation() {
 
 setInterval(applySpoilerTagsToConversation, 1000);
 
+
 // Resizable chat box
 // ==================
 // This resets the user applied size after message submit,
@@ -96,3 +97,32 @@ $(document).ready(function() {
   });
 });
 
+
+// Only submit on CTRL + Enter
+// ===========================
+$(document).ready(function() {
+  document.addEventListener('keydown', function(event) {
+    if ($(event.target).is('textarea#prompt-textarea')) {
+      if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        // Prevent submission
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Simulate pressing Enter regularly -- i.e., insert a newline
+        let cursorPos = event.target.selectionStart;
+        let value = event.target.value;
+        let newText = value.substring(0, cursorPos) + "\n" + value.substring(cursorPos);
+        event.target.value = newText;
+        event.target.selectionStart = cursorPos + 1;
+        event.target.selectionEnd = cursorPos + 1;
+
+        // Trigger input event to trigger textarea auto-resize
+			  var inputEvent = new Event('input', {
+			    bubbles: true,
+			    cancelable: true,
+				});
+				event.target.dispatchEvent(inputEvent)
+      }
+    }
+  }, true); // The true here specifies the capture phase. Needed for event stopPropagation to work.
+});
