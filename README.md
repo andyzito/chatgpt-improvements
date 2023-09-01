@@ -28,3 +28,11 @@ I think that chatwithgpt and other efforts to provide a full fledged independent
 ## How do I use this?
 
 I use the [User JavaScript and CSS](https://chrome.google.com/webstore/detail/user-javascript-and-css/nbhcbdghjpllgmfilhnhkllmkecfmpld) Chrome plugin. I'm sure there are similar plugins for Firefox. For User JavaScript and CSS, make sure you enable jQuery in the Options menu.
+
+## In depth feature documentation
+
+### Focus shortcut ( `/` )
+
+This one is pretty simple. It listens to the whole page for the relevant keypress, and when detected, it shifts focus to the chat box. I picked `/` because that's what Youtube uses.
+
+Future improvement: Add a setting to change `/` to other keys if desired.

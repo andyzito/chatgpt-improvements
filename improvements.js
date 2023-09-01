@@ -2,8 +2,8 @@
 // ==========================
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
-    // Check if CTRL is pressed and the key is '\'
-    if ((event.ctrlKey || event.metaKey) && event.key === '\\') {
+    // Check if CTRL is pressed and the key is '/'
+    if (event.key === '/' && !$(event.target).is('textarea#prompt-textarea')) {
       // Set focus to the textarea
       const textarea = document.querySelector('textarea#prompt-textarea')
       if (textarea) {
