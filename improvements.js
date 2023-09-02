@@ -57,6 +57,12 @@ function applySpoilerTagsToContent(parentElement) {
     for (let spoilerNode of spoilerNodes) {
       // span.appendChild(spoilerNode)
       $(span).append(spoilerNode.cloneNode(true))
+      if (spoilerNode.nodeType === Node.TEXT_NODE) {
+        spoilerNode.nodeValue = "";
+      } else if (spoilerNode.nodeType === Node.ELEMENT_NODE) {
+        spoilerNode.innerHTML = "";
+        $(spoilerNode).css('display', 'none')
+      }
     }
 
     // Reset states
@@ -108,10 +114,10 @@ function observeForSpoilers() {
         const containsSpoilerEndTag = [...mutation.target.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent.includes('</spoiler>'));
 
         if(containsSpoilerEndTag) {
-          // const message = mutation.target.closest('div.markdown.prose');
-          // applySpoilerTagsToContent(message)
+          const message = mutation.target.closest('div.markdown.prose');
+          applySpoilerTagsToContent(message)
           // console.log('test')
-          applySpoilerTagsToConversation()
+          // applySpoilerTagsToConversation()
         }
       }
     }
