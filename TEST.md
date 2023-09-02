@@ -1,6 +1,10 @@
 In lieu of some kind of automated testing, which I may set up eventually but not yet, here is a handy-dandy list of how to test ALL the funcionality here.
 
-## Spoiler Tags
+# Focus Shortcut
+
+Click anywhere on the page to de-focus from the chat box. Press the `/` key. You should now be focused on the chat box. Type some stuff in, then repeat the test to ensure when you re-focus, your cursor starts at the end of the text.
+
+# Spoiler Tags
 
 Input:
 ```
@@ -24,3 +28,7 @@ Now, watch the reply generate. In each case, **except for the code blocks**, you
 Hover over the various spoiler tags. They should contain the properly formatted "top secret" message, and nothing else. When unhovered, none of the text should be visible, and when hovered, it should *all* be visible.
 
 Reload the page, and navigate back to the same conversation if needed. The spoiler tags should be replaced slightly after the conversation is reloaded. Perform the same checks as above.
+
+# Resizable Chat Box
+
+# Don't Submit on Enter

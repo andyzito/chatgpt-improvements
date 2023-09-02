@@ -13,12 +13,18 @@ So far, the following features are available:
 - **Resizable Chat Box**: Drag to make it taller or shorter
 - **Don't Submit on Enter**: Only submit on `^ CTRL + Enter` or `⌘ CMD + Enter`
 
-Future improvements might include:
+Future features might include:
 
-- Settings!
-- Other working markup, for example a way to output colors
-- Font family and size customization
-- Collapsible code and other blocks
+- A settings modal to, for example, enable/disable features (stored in Cookies)
+- Font family and size customization (in settings)
+- Hide generating message until it is complete (remove live typing)
+- Code block improvements:
+  - Collapsible
+  - Line numbers
+  - Wrapping
+  - Better syntax identification?
+- Add VSCode-like functionality to chat box, for example, `ALT + UP` to move the current line up (maybe there's an existing editor that could be overlayed?)
+- View source text of message (no rendered markdown formatting) (this might be impossible)
 - Ways to categorize/mark conversations
 
 ## Why not just use a full improved interface like [chatwithgpt](https://github.com/cogentapps/chat-with-gpt)?
@@ -39,15 +45,20 @@ Future improvement: Add a setting to change `/` to other keys if desired.
 
 ### Spoiler Tags
 
-This scans message content for `<spoiler>...</spoiler>` in the text response and replaces it with actual functioning spoiler tags.
+This scans message content for `<spoiler>...</spoiler>` in the text response and replaces it with actual functioning spoiler tags. It does not perform this replacement inside code blocks or inline code blocks.
+
+The replaced spoiler tag retains internal formatting like **bold**, *italics*, ~~strikethrough~~, `inline code block`. I expect it would not work with a block level element inside the spoiler tags, but haven't actually tested that yet.
 
 Example use case: "Give me a riddle and output your answer in a spoiler tag."
 
 Sample custom instructions (untested): `You can output text that is hidden except on hover by using <spoiler> </spoiler> tags.`
 
-Future improvement: Adjustable styles in settings.
+
+Future improvement: When a `<spoiler>` tag is spotted, black out all following content immediately until the `</spoiler>`. This sounds complicated but it would be cool, since for GPT-4 the speed is slow enough that you can read the spoiler contents before replacement if you're watching live.
 
 Future improvement: Support other spoiler markup types, like `>!`.
+
+Future improvement: Adjustable styles in settings.
 
 ### Resizable Chat Box
 
