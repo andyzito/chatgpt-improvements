@@ -3,9 +3,7 @@
 
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
-    // Check if CTRL is pressed and the key is '/'
     if (event.key === '/' && !$(event.target).is('textarea#prompt-textarea')) {
-      // Set focus to the textarea
       const textarea = document.querySelector('textarea#prompt-textarea')
       if (textarea) {
         textarea.focus();
@@ -16,18 +14,26 @@ $(document).ready(() => {
 })
 
 
+
 // Spoiler Tags
 // ============================================================================
 
+// We will store pairs of startNodes and spans here.
+// The ChatGPT interface provides rendered markdown formatting by
+// going back and deleting textNodes and replacing them with, say, a <strong> element.
+// Our <spoiler> tags are not included in the interface's list of textNodes to delete.
+// This pattern will ensure that we clean up vestigial <spoiler>s if the original context
+// has been replaced by live formatting HTML elements.
 const watchForDeletion = []
 
 function applySpoilerTagsToContent(parentElement) {
-  // If the parent element is a code block, skip it
+  // If we're in a code block, skip it
   if (parentElement.tagName === 'PRE' || parentElement.tagName === 'CODE') {
     return;
   }
 
   // Check for deleted source nodes, and remove corresponding span if found.
+  // See comment above, `const watchForDeletion = []`, for more details.
   for (let pair of watchForDeletion) {
     if (!pair.noCheck && !document.contains(pair.ifDeleted)) {
       pair.thenDelete.remove()
@@ -42,21 +48,29 @@ function applySpoilerTagsToContent(parentElement) {
   let endNode = null;
 
   const wrapContentWithSpoiler = () => {
+    // Create and insert spoiler span.
     const span = document.createElement('span');
     span.className = 'spoiler-content';
-
     parentElement.insertBefore(span, startNode);
+
+    // Add our start node to the deletion watch list.
+    // See comment above, `const watchForDeletion = []`, for more details.
     watchForDeletion.push({
       ifDeleted: startNode,
       thenDelete: span,
       noCheck: false,
     })
+
+    // Zero out our start and end nodes, we don't want the text "<spoiler>" to still show up.
     startNode.nodeValue = ''
     endNode.nodeValue = ''
 
+    // For all nodes that were between the spoiler tags...
     for (let spoilerNode of spoilerNodes) {
-      // span.appendChild(spoilerNode)
+      // Insert a copy into the spoiler span
       $(span).append(spoilerNode.cloneNode(true))
+      // Zero out the source node without deleting it, so ChatGPT doesn't get confused
+      // if it removes the source node later.
       if (spoilerNode.nodeType === Node.TEXT_NODE) {
         spoilerNode.nodeValue = "";
       } else if (spoilerNode.nodeType === Node.ELEMENT_NODE) {
@@ -74,19 +88,21 @@ function applySpoilerTagsToContent(parentElement) {
 
   for (const child of parentElement.childNodes) {
     if (!isInsideSpoiler) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        if (child.textContent.includes('<spoiler>')) {
-          isInsideSpoiler = true;
-          startNode = child;
-        }
+      if (child.nodeType === Node.TEXT_NODE && child.textContent.includes('<spoiler>')) {
+        // We've found the start node!
+        isInsideSpoiler = true;
+        startNode = child;
       } else {
+        // We've found an elementNode outside of a spoiler tag, recurse into it.
         applySpoilerTagsToContent(child)
       }
     } else {
       if (child.nodeType === Node.TEXT_NODE && child.textContent.includes('</spoiler>')) {
+        // We've found the end node!
         endNode = child
         wrapContentWithSpoiler();
       } else {
+        // We've found some non-end node inside a spoiler. Add it to the list.
         spoilerNodes.push(child);
       }
     }
@@ -94,7 +110,6 @@ function applySpoilerTagsToContent(parentElement) {
 }
 
 function applySpoilerTagsToConversation() {
-  // Get all messages from ChatGPT
   let messages = document.querySelectorAll('main div.markdown.prose');
 
   messages.forEach(message => {
@@ -102,6 +117,7 @@ function applySpoilerTagsToConversation() {
   });
 }
 
+// This is what allows us to rapid replacement in actively generating messages.
 function observeForSpoilers() {
   // Options for the observer (which mutations to observe)
   const config = { childList: true, subtree: true, characterData: true };
@@ -114,10 +130,9 @@ function observeForSpoilers() {
         const containsSpoilerEndTag = [...mutation.target.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent.includes('</spoiler>'));
 
         if(containsSpoilerEndTag) {
+          // Only process the message from which the detected `</spoiler>` originated.
           const message = mutation.target.closest('div.markdown.prose');
           applySpoilerTagsToContent(message)
-          // console.log('test')
-          // applySpoilerTagsToConversation()
         }
       }
     }
@@ -128,6 +143,7 @@ function observeForSpoilers() {
 
   // Start observing the target node for configured mutations
   const conversation = document.querySelector('main > div[role=presentation] div.flex-1.overflow-hidden div[class*="react-scroll-to-bottom"] > div.flex.flex-col')
+
   if (conversation) {
     observer.observe(conversation, config);
   } else {
@@ -154,6 +170,7 @@ $(document).ready(() => {
 });
 
 
+
 // Resizable Chat Box
 // ============================================================================
 
@@ -168,6 +185,7 @@ $(document).ready(() => {
     }
   });
 });
+
 
 
 // Don't Submit on Enter
