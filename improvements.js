@@ -19,58 +19,70 @@ $(document).ready(() => {
 // Spoiler Tags
 // ============================================================================
 
+const watchForDeletion = []
+
 function applySpoilerTagsToContent(parentElement) {
   // If the parent element is a code block, skip it
-  if (parentElement.tagName === 'PRE') {
+  if (parentElement.tagName === 'PRE' || parentElement.tagName === 'CODE') {
     return;
   }
 
+  // Check for deleted source nodes, and remove corresponding span if found.
+  for (let pair of watchForDeletion) {
+    if (!pair.noCheck && !document.contains(pair.ifDeleted)) {
+      pair.thenDelete.remove()
+      pair.noCheck = true
+    }
+  }
+
+  // Initialize state
   let isInsideSpoiler = false;
-  let spoilerContent = '';
+  let spoilerNodes = [];
   let startNode = null;
-  let toBeDeleted = [];
+  let endNode = null;
 
   const wrapContentWithSpoiler = () => {
     const span = document.createElement('span');
     span.className = 'spoiler-content';
-    span.textContent = spoilerContent;
 
-    // Replace startNode with spoiler span
-    parentElement.replaceChild(span, startNode);
+    parentElement.insertBefore(span, startNode);
+    watchForDeletion.push({
+      ifDeleted: startNode,
+      thenDelete: span,
+      noCheck: false,
+    })
+    startNode.nodeValue = ''
+    endNode.nodeValue = ''
 
-		// Delete all the nodes that were within the spoiler tag, since it's all now in the startNode.
-    toBeDeleted.forEach(node => {
-      if (node && node.parentNode) {
-        node.parentNode.removeChild(node);
-		  }
-		});
+    for (let spoilerNode of spoilerNodes) {
+      // span.appendChild(spoilerNode)
+      $(span).append(spoilerNode.cloneNode(true))
+    }
 
     // Reset states
-		toBeDeleted = [];
     isInsideSpoiler = false;
-    spoilerContent = '';
+    spoilerNodes = [];
     startNode = null;
+    endNode = null;
   };
 
   for (const child of parentElement.childNodes) {
-    // Text node
-    if (child.nodeType === Node.TEXT_NODE) {
-      if (child.textContent.includes('<spoiler>')) {
-        isInsideSpoiler = true;
-        startNode = child;
+    if (!isInsideSpoiler) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (child.textContent.includes('<spoiler>')) {
+          isInsideSpoiler = true;
+          startNode = child;
+        }
+      } else {
+        applySpoilerTagsToContent(child)
       }
-      if (isInsideSpoiler) {
-      	toBeDeleted.push(child) // So we can delete everything after the opening tag, which will be replaced with the spoiler content
-        if (child.textContent.includes('</spoiler>')) {
-	        wrapContentWithSpoiler();
-	      } else {
-	        spoilerContent += child.textContent.replace('<spoiler>', '').replace('</spoiler>', '');
-	      }
-      }
-
     } else {
-      // For non-text nodes, recur into them
-      applySpoilerTagsToContent(child);
+      if (child.nodeType === Node.TEXT_NODE && child.textContent.includes('</spoiler>')) {
+        endNode = child
+        wrapContentWithSpoiler();
+      } else {
+        spoilerNodes.push(child);
+      }
     }
   }
 }
@@ -80,14 +92,60 @@ function applySpoilerTagsToConversation() {
   let messages = document.querySelectorAll('main div.markdown.prose');
 
   messages.forEach(message => {
-  	applySpoilerTagsToContent(message)
+    applySpoilerTagsToContent(message)
   });
 }
 
+function observeForSpoilers() {
+  // Options for the observer (which mutations to observe)
+  const config = { childList: true, subtree: true, characterData: true };
+
+  // Callback function to execute when mutations are observed
+  const mutate = function(mutationsList, observer) {
+    for(let mutation of mutationsList) {
+      if(mutation.type === 'characterData' || mutation.type === 'childList') {
+        // Check if added node contains '</spoiler>'
+        const containsSpoilerEndTag = [...mutation.target.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent.includes('</spoiler>'));
+
+        if(containsSpoilerEndTag) {
+          // const message = mutation.target.closest('div.markdown.prose');
+          // applySpoilerTagsToContent(message)
+          // console.log('test')
+          applySpoilerTagsToConversation()
+        }
+      }
+    }
+  };
+
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver(mutate);
+
+  // Start observing the target node for configured mutations
+  const conversation = document.querySelector('main > div[role=presentation] div.flex-1.overflow-hidden div[class*="react-scroll-to-bottom"] > div.flex.flex-col')
+  if (conversation) {
+    observer.observe(conversation, config);
+  } else {
+    setTimeout(observeForSpoilers, 1000)
+  }
+}
+
+function applyOnConversationLoad() {
+  if(document.querySelector('main div.markdown.prose') !== null) {
+    applySpoilerTagsToConversation();
+    setInterval(applySpoilerTagsToConversation, 10000)
+    return;
+  }
+  else {
+    setTimeout(() => {
+      applyOnConversationLoad();
+    }, 1000);
+  }
+}
+
 $(document).ready(() => {
-  applySpoilerTagsToConversation()
-  setInterval(applySpoilerTagsToConversation, 1000);
-})
+  applyOnConversationLoad();
+  observeForSpoilers();
+});
 
 
 // Resizable Chat Box
@@ -99,7 +157,7 @@ $(document).ready(() => {
 $(document).ready(() => {
   $(document).on('keydown', 'textarea#prompt-textarea', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
-		  const outerDiv = $('main form > div > div.flex.w-full.items-center > div.flex')
+      const outerDiv = $('main form > div > div.flex.w-full.items-center > div.flex')
       outerDiv.css('height', '');  // Clear the inline height style
     }
   });
@@ -126,11 +184,11 @@ $(document).ready(() => {
         event.target.selectionEnd = cursorPos + 1;
 
         // Trigger input event to trigger textarea auto-resize
-			  var inputEvent = new Event('input', {
-			    bubbles: true,
-			    cancelable: true,
-				});
-				event.target.dispatchEvent(inputEvent)
+        var inputEvent = new Event('input', {
+          bubbles: true,
+          cancelable: true,
+        });
+        event.target.dispatchEvent(inputEvent)
       }
     }
   }, true); // The true here specifies the capture phase. Needed for event stopPropagation to work.

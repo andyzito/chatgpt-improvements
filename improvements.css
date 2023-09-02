@@ -9,7 +9,18 @@
   border-radius: 5px;
 }
 
-.spoiler-content:hover {
+.spoiler-content pre,
+.spoiler-content code,
+.spoiler-content strong
+{
+  color: black;
+}
+
+.spoiler-content:hover,
+.spoiler-content:hover pre,
+.spoiler-content:hover code,
+.spoiler-content:hover strong
+{
   color: white;
 }
 
@@ -28,4 +39,3 @@ textarea#prompt-textarea {
   max-height: 80vh !important;
   overflow-y: scroll !important;
 }
-
