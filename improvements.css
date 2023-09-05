@@ -39,3 +39,9 @@ textarea#prompt-textarea {
   max-height: 80vh !important;
   overflow-y: scroll !important;
 }
+
+/* Enable Highlight On All Text */
+/* ===================================================== */
+* {
+	user-select: text;
+}
