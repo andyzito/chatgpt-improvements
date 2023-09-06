@@ -1,4 +1,4 @@
-// CONFIG
+// CONFIG AND INIT
 // ============================================================================
 
 const ourWindowObj = window.andyChatGptImprovements = {}
@@ -50,13 +50,13 @@ $(document).ready(() => {
   config.resizableChatBoxResetSizeOnSubmit = new Toggle(true)
   config.focusShortcutEnabled = new FeatureToggle(FocusShortcut, true)
   config.focusShortcutKey = new Config('/')
-  // config.spoilerTagsEnabled = true
-  // config.dontSubmitOnEnterEnabled = true
+  config.spoilerTagsEnabled = new FeatureToggle(SpoilerTags, true)
+  config.dontSubmitOnEnterEnabled = new FeatureToggle(DontSubmitOnEnter, true)
 
-  FocusShortcut.init()
-  ResizableChatBox.init()
-  // SpoilerTags.init()
-  // dontSubmitOnEnter.init()
+  FocusShortcut.on()
+  ResizableChatBox.on()
+  SpoilerTags.on()
+  DontSubmitOnEnter.on()
 })
 
 
@@ -73,6 +73,11 @@ $(document).ready(() => {
       if ($(inputElement).length) {
         if (inputElement.type === "checkbox") {
           inputElement.checked = value;
+          if (value) {
+            configObject.on()
+          } else {
+            configObject.off()
+          }
         } else if (inputElement.type === "text" || inputElement.type === "number") {
           inputElement.value = value;
         }
@@ -202,8 +207,6 @@ $(document).ready(() => {
 // ============================================================================
 
 class Feature {
-  static init() {}
-
   static on() {
     $('body').addClass(`andyChatGptImprovements--${this.shortName}Enabled`)
   }
@@ -219,7 +222,11 @@ class Feature {
 // ============================================================================
 
 class FocusShortcut extends Feature {
-  static init() {
+  static shortName = 'focusShortcut'
+
+  static on() {
+    super.on()
+
     document.addEventListener('keydown', (event) => {
       if (!configValue('focusShortcutEnabled')) { return }
 
@@ -239,17 +246,33 @@ class FocusShortcut extends Feature {
 // Spoiler Tags
 // ============================================================================
 
-$(document).ready((event) => {
+// $(document).ready((event) => {
+class SpoilerTags extends Feature {
+  static shortName = 'spoilerTags'
+  static observer = null
+  static intervalId = null
+
   // We will store pairs of startNodes and spans here.
   // The ChatGPT interface provides rendered markdown formatting by
   // going back and deleting textNodes and replacing them with, say, a <strong> element.
   // Our <spoiler> tags are not included in the interface's list of textNodes to delete.
   // This pattern will ensure that we clean up vestigial <spoiler>s if the original context
   // has been replaced by live formatting HTML elements.
-  const watchForDeletion = []
+  static watchForDeletion = []
 
-  function applySpoilerTagsToContent(parentElement) {
-    if (!config.spoilerTagsEnabled) { return }
+  static on() {
+    this.applyOnConversationLoad()
+    this.observeForSpoilers()
+  }
+
+  static off() {
+    this.observer.disconnect()
+    clearInterval(this.intervalId)
+    // And maybe backreplace <spoiler>s
+  }
+
+  static applySpoilerTagsToContent(parentElement) {
+    if (!configValue('spoilerTagsEnabled')) { return } // Hard check, but this should be taken care of by off()
 
     // If we're in a code block, skip it
     if (parentElement.tagName === 'PRE' || parentElement.tagName === 'CODE') {
@@ -258,7 +281,7 @@ $(document).ready((event) => {
 
     // Check for deleted source nodes, and remove corresponding span if found.
     // See comment above, `const watchForDeletion = []`, for more details.
-    for (let pair of watchForDeletion) {
+    for (let pair of this.watchForDeletion) {
       if (!pair.noCheck && !document.contains(pair.ifDeleted)) {
         pair.thenDelete.remove()
         pair.noCheck = true
@@ -279,7 +302,7 @@ $(document).ready((event) => {
 
       // Add our start node to the deletion watch list.
       // See comment above, `const watchForDeletion = []`, for more details.
-      watchForDeletion.push({
+      this.watchForDeletion.push({
         ifDeleted: startNode,
         thenDelete: span,
         noCheck: false,
@@ -318,7 +341,7 @@ $(document).ready((event) => {
           startNode = child
         } else {
           // We've found an elementNode outside of a spoiler tag, recurse into it.
-          applySpoilerTagsToContent(child)
+          this.applySpoilerTagsToContent(child)
         }
       } else {
         if (child.nodeType === Node.TEXT_NODE && child.textContent.includes('</spoiler>')) {
@@ -333,18 +356,18 @@ $(document).ready((event) => {
     }
   }
 
-  function applySpoilerTagsToConversation() {
+  static applySpoilerTagsToConversation() {
     let messages = document.querySelectorAll('main div.markdown.prose')
 
     messages.forEach(message => {
-      applySpoilerTagsToContent(message)
+      this.applySpoilerTagsToContent(message)
     })
   }
 
   // This is what allows us to rapid replacement in actively generating messages.
-  function observeForSpoilers() {
+  static observeForSpoilers() {
     // Options for the observer (which mutations to observe)
-    const config = { childList: true, subtree: true, characterData: true }
+    const observerConfig = { childList: true, subtree: true, characterData: true }
 
     // Callback function to execute when mutations are observed
     const mutate = function(mutationsList, observer) {
@@ -356,41 +379,35 @@ $(document).ready((event) => {
           if(containsSpoilerEndTag) {
             // Only process the message from which the detected `</spoiler>` originated.
             const message = mutation.target.closest('div.markdown.prose')
-            applySpoilerTagsToContent(message)
+            this.applySpoilerTagsToContent(message)
           }
         }
       }
-    }
+    }.bind(this)
 
     // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(mutate)
+    this.observer = new MutationObserver(mutate)
 
     // Start observing the target node for configured mutations
     const conversation = document.querySelector('main > div[role=presentation] div.flex-1.overflow-hidden div[class*="react-scroll-to-bottom"] > div.flex.flex-col')
 
     if (conversation) {
-      observer.observe(conversation, config)
+      this.observer.observe(conversation, observerConfig)
     } else {
-      setTimeout(observeForSpoilers, 1000)
+      setTimeout(this.observeForSpoilers.bind(this), 1000)
     }
   }
 
-  function applyOnConversationLoad() {
+  static applyOnConversationLoad() {
     if(document.querySelector('main div.markdown.prose') !== null) {
-      applySpoilerTagsToConversation()
-      setInterval(applySpoilerTagsToConversation, 10000)
+      this.applySpoilerTagsToConversation()
+      this.intervalId = setInterval(this.applySpoilerTagsToConversation.bind(this), 10000)
       return
-    }
-    else {
-      setTimeout(() => {
-        applyOnConversationLoad()
-      }, 1000)
+    } else {
+      setTimeout(this.applyOnConversationLoad.bind(this), 1000)
     }
   }
-
-  applyOnConversationLoad()
-  observeForSpoilers()
-})
+}
 
 
 
@@ -403,8 +420,8 @@ $(document).ready((event) => {
 class ResizableChatBox extends Feature {
   static shortName = 'resizableChatBox'
 
-  static init() {
-    super.init()
+  static on() {
+    super.on()
 
     $(document).on('keydown', 'textarea#prompt-textarea', (event) => {
       if (!configValue('resizableChatBoxResetSizeOnSubmit')) { return }
@@ -422,31 +439,37 @@ class ResizableChatBox extends Feature {
 // Don't Submit on Enter
 // ============================================================================
 
-$(document).ready(() => {
-  document.addEventListener('keydown', (event) => {
-    if (!config.dontSubmitOnEnterEnabled) { return }
+class DontSubmitOnEnter extends Feature {
+  static shortName = 'dontSubmitOnEnter'
 
-    if ($(event.target).is('textarea#prompt-textarea')) {
-      if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-        // Prevent submission
-        event.stopPropagation()
-        event.preventDefault()
+  static on() {
+    super.on()
 
-        // Simulate pressing Enter regularly -- i.e., insert a newline
-        let cursorPos = event.target.selectionStart
-        let value = event.target.value
-        let newText = value.substring(0, cursorPos) + "\n" + value.substring(cursorPos)
-        event.target.value = newText
-        event.target.selectionStart = cursorPos + 1
-        event.target.selectionEnd = cursorPos + 1
+    document.addEventListener('keydown', (event) => {
+      if (!configValue('dontSubmitOnEnterEnabled')) { return }
 
-        // Trigger input event to trigger textarea auto-resize
-        var inputEvent = new Event('input', {
-          bubbles: true,
-          cancelable: true,
-        })
-        event.target.dispatchEvent(inputEvent)
+      if ($(event.target).is('textarea#prompt-textarea')) {
+        if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+          // Prevent submission
+          event.stopPropagation()
+          event.preventDefault()
+
+          // Simulate pressing Enter regularly -- i.e., insert a newline
+          let cursorPos = event.target.selectionStart
+          let value = event.target.value
+          let newText = value.substring(0, cursorPos) + "\n" + value.substring(cursorPos)
+          event.target.value = newText
+          event.target.selectionStart = cursorPos + 1
+          event.target.selectionEnd = cursorPos + 1
+
+          // Trigger input event to trigger textarea auto-resize
+          var inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+          })
+          event.target.dispatchEvent(inputEvent)
+        }
       }
-    }
-  }, true) // The true here specifies the capture phase. Needed for event stopPropagation to work.
-})
+    }, true) // The true here specifies the capture phase. Needed for event stopPropagation to work.
+  }
+}
