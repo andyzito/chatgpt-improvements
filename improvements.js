@@ -1,9 +1,23 @@
+// CONFIG
+// ============================================================================
+
+const config = window.andyChatGptImprovementsConfig = {
+  FocusShortcutEnabled: true,
+  FocusShortcutKey: "k",
+  SpoilerTagsEnabled: true,
+  ResizableChatBoxEnabled: true,
+  ResizableChatBoxResetSizeOnSubmit: true,
+  DontSubmitOnEnterEnabled: true,
+}
+
 // Focus Shortcut
 // ============================================================================
 
 $(document).ready(() => {
   document.addEventListener('keydown', (event) => {
-    if (event.key === '/' && !$(event.target).is('textarea#prompt-textarea')) {
+  	if (!config.FocusShortcutEnabled) { return }
+
+    if (event.key === config.FocusShortcutKey && !$(event.target).is('textarea#prompt-textarea')) {
       const textarea = document.querySelector('textarea#prompt-textarea')
       if (textarea) {
         textarea.focus()
