@@ -1,3 +1,16 @@
+/* Settings */
+/* ===================================================== */
+#andyChatGptImprovements-settingsButton {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  height: 50px;
+  width: 50px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
 /* Spoiler Tags */
 /* ===================================================== */
 
@@ -27,13 +40,13 @@
 /* Resizable Chat Box */
 /* ===================================================== */
 
-main form > div > div.flex.w-full.items-center > div.flex {
+body.andyChatGptImprovements--resizableChatBoxEnabled main form > div > div.flex.w-full.items-center > div.flex {
   transform: rotateX(180deg);
   resize: vertical !important;
   overflow: auto !important;
 }
 
-textarea#prompt-textarea {
+body.andyChatGptImprovements--resizableChatBoxEnabled textarea#prompt-textarea {
   transform: rotateX(180deg);
   border: 1px solid #505262;
   max-height: 80vh !important;
