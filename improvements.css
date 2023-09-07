@@ -2,14 +2,108 @@
 /* ===================================================== */
 #andyChatGptImprovements-settingsButton {
   position: fixed;
-  top: 30px;
-  right: 30px;
-  height: 50px;
-  width: 50px;
+  z-index: 1000000;
+  top: 17px;
+  right: 60px;
+  height: 30px;
+  width: 30px;
   background: white;
+  border: 2px solid black;
   border-radius: 50%;
   cursor: pointer;
 }
+
+#andyChatGptImprovements-settingsOverlay {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(86, 88, 105, 0.7);
+}
+
+#andyChatGptImprovements-settingsModal {
+	display: none;
+	position: fixed;
+	z-index: 99;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	height: 500px;
+	width: 550px;
+	background: rgb(32, 33, 35);
+	border-radius: 0.5rem;
+	overflow: hidden;
+}
+
+#andyChatGptImprovements-settingsModal .inner-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+#andyChatGptImprovements-settingsModal .header {
+	display: flex;
+	justify-content: space-between;
+	padding: 1.5rem;
+	color: rgb(217, 217, 227);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#andyChatGptImprovements-settingsModal .header h2 {
+	font-size: 18px;
+	font-weight: 540;
+	font-family: Söhne,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Helvetica Neue,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+}
+
+#andyChatGptImprovements-settingsModal .content {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	padding: 24px;
+}
+
+/* Hide the default checkbox */
+#andyChatGptImprovements-settingsModal .hidden-checkbox {
+    display: none;
+}
+
+/* Custom checkbox styling */
+#andyChatGptImprovements-settingsModal .custom-checkbox {
+    position: relative;
+    cursor: pointer;
+    padding-left: 30px; /* Space for the custom checkbox */
+    padding-bottom: 10px;
+}
+
+#andyChatGptImprovements-settingsModal .styled-checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background-color: #eee;
+    border: 2px solid #555;
+}
+
+/* Style when the checkbox is checked */
+#andyChatGptImprovements-settingsModal .hidden-checkbox:checked + .styled-checkbox {
+    background-color: #555;
+    border: 2px solid #eee;
+}
+
+/* Optionally, add a tick icon when checked using pseudo-element */
+#andyChatGptImprovements-settingsModal .hidden-checkbox:checked + .styled-checkbox::before {
+    content: '\2713'; /* Unicode checkmark */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #eee;
+}
+
+
 
 /* Spoiler Tags */
 /* ===================================================== */
