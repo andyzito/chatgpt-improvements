@@ -42,7 +42,7 @@ class FeatureToggle extends Toggle {
 }
 
 function configValue(name) {
-	return config[name].value
+  return config[name].value
 }
 
 $(document).ready(() => {
@@ -207,8 +207,11 @@ $(document).ready(() => {
 // ============================================================================
 
 class Feature {
+  static initialized = false
+
   static on() {
     $('body').addClass(`andyChatGptImprovements--${this.shortName}Enabled`)
+    this.initialized = true
   }
 
   static off() {
@@ -225,8 +228,10 @@ class FocusShortcut extends Feature {
   static shortName = 'focusShortcut'
 
   static on() {
+    const initialized = this.initialized // Save bf super overrides
     super.on()
 
+    if (initialized) { return }
     document.addEventListener('keydown', (event) => {
       if (!configValue('focusShortcutEnabled')) { return }
 
@@ -261,12 +266,19 @@ class SpoilerTags extends Feature {
   static watchForDeletion = []
 
   static on() {
+    const initialized = this.initialized // Save bf super overrides
+    super.on()
+
     this.applyOnConversationLoad()
-    this.observeForSpoilers()
+
+    if (this.observer == null) {
+      this.observeForSpoilers()
+    }
   }
 
   static off() {
     this.observer.disconnect()
+    this.observer = null
     clearInterval(this.intervalId)
     // And maybe backreplace <spoiler>s
   }
@@ -421,7 +433,10 @@ class ResizableChatBox extends Feature {
   static shortName = 'resizableChatBox'
 
   static on() {
+    const initialized = this.initialized // Save bf super overrides
     super.on()
+
+    if (initialized) { return }
 
     $(document).on('keydown', 'textarea#prompt-textarea', (event) => {
       if (!configValue('resizableChatBoxResetSizeOnSubmit')) { return }
@@ -443,31 +458,20 @@ class DontSubmitOnEnter extends Feature {
   static shortName = 'dontSubmitOnEnter'
 
   static on() {
+    const initialized = this.initialized // Save bf super overrides
     super.on()
+
+    if (initialized) { return }
 
     document.addEventListener('keydown', (event) => {
       if (!configValue('dontSubmitOnEnterEnabled')) { return }
 
       if ($(event.target).is('textarea#prompt-textarea')) {
         if (event.key === "Enter" && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-          // Prevent submission
-          event.stopPropagation()
-          event.preventDefault()
-
-          // Simulate pressing Enter regularly -- i.e., insert a newline
-          let cursorPos = event.target.selectionStart
-          let value = event.target.value
-          let newText = value.substring(0, cursorPos) + "\n" + value.substring(cursorPos)
-          event.target.value = newText
-          event.target.selectionStart = cursorPos + 1
-          event.target.selectionEnd = cursorPos + 1
-
-          // Trigger input event to trigger textarea auto-resize
-          var inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true,
-          })
-          event.target.dispatchEvent(inputEvent)
+          // Make this think it's a shift+enter to prevent submission
+          Object.defineProperty(event, 'shiftKey', {
+            get: () => true
+          });
         }
       }
     }, true) // The true here specifies the capture phase. Needed for event stopPropagation to work.
